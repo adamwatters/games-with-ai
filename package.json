@@ -1,0 +1,27 @@
+{
+  "name": "openai-quickstart-node",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "firebase": "^9.19.1",
+    "firebase-admin": "^11.5.0",
+    "langchain": "^0.0.45",
+    "next": "^13.1.1",
+    "openai": "^3.1.0",
+    "openai-stream-mini": "^1.0.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "devDependencies": {
+    "@types/react": "18.0.33",
+    "typescript": "5.0.3"
+  }
+}
