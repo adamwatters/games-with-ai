@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 // Import the functions you need from the SDKs you need
 import { initializeApp  } from "firebase/app";
 import { doc, onSnapshot, getFirestore, collection, query, where, getDocs } from "firebase/firestore";
@@ -35,25 +35,12 @@ export default function Home() {
   const [conversation, setConversation] = useState([]);
   const [loading, setLoading] = useState(false);
   const [phrases, setPhrases] = useState([]);
-  const [dailyChallengeActive, setDailyChallengeActive] = useState(false);
 
-  const aiFunctions = {
-    setupGame(phraseCount) {
-      setPhrases(Array(Number(phraseCount)).fill(null))
-    },
-    startGame() {
-      setDailyChallengeActive(true);
-    },
-    finishRound(index, phrase) {
-      const copy = [...phrases];
-      copy[index] = phrase;
-      setPhrases(copy);
-    },
-    finishGame() {
-      setDailyChallengeActive(false);
-    }
-  }
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [timer, setTimer] = useState(120);
+  const chatScrollRef = useRef(null)
 
+  // get conversation from firestore
   useEffect(() => {
     let db = setupFirestore()
     let userID = getFromStorage("userID");
@@ -73,6 +60,44 @@ export default function Home() {
     }
   }, []);
 
+  // timer countdown
+  useEffect(() => {
+    let timerUpdate;
+    if (timerRunning && timer > 0) {
+      // Update the count every second
+      timerUpdate = setInterval(() => setTimer(timer - 1), 1000);
+    }
+    // Cleanup the interval when the component unmounts or isRunning changes
+    return () => clearInterval(timerUpdate);
+  }, [timer, timerRunning]);
+
+  // scroll to bottom of chat
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [conversation]);
+
+  // functions AI can call via actions
+  const aiFunctions = {
+    setupGame(phraseCount, gameLengthInSeconds) {
+      setTimer(gameLengthInSeconds);
+      setTimerRunning(false);
+      setPhrases(Array(Number(phraseCount)).fill(null))
+    },
+    startGame() {
+      setTimerRunning(true);
+    },
+    finishRound(index, phrase) {
+      const copy = [...phrases];
+      copy[index] = phrase;
+      setPhrases(copy);
+    },
+    finishGame() {
+      setTimerRunning(false);
+    }
+  }
+
   const onSubmit = async (event) => {
     event.preventDefault();
     setConversation([...conversation, { role: "user", content: playerInput }]);
@@ -84,7 +109,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ playerInput: playerInput, userID: getFromStorage("userID") }),
+        body: JSON.stringify({ playerInput: `${playerInput} (time remaining: ${timer})`, userID: getFromStorage("userID") }),
       });
 
       const data = await response.json();
@@ -111,7 +136,7 @@ export default function Home() {
   return (
     <div>
       <Head>
-        <title>Word Games with AI</title>
+        <title>Games with AI</title>
         <link rel="icon" href="/dog.png" />
       </Head>
 
@@ -128,7 +153,7 @@ export default function Home() {
             {phrases.length > 0 ? (
               <div className={styles.dailyScoreCard}>
                 <h3>Daily Challenge</h3>
-                <CountDown initialCount={120} isRunning={dailyChallengeActive}/>
+                <CountDown time={timer}/>
                 <div>
                   {phrases.map((phrase, index) => {
                     return <div key={index}>{`${index + 1}: ${phrase ? phrase : '___________________'}`}</div>
@@ -148,7 +173,7 @@ export default function Home() {
           />
           <input type="submit" value={loading ? "..." : "Send"} disabled={loading || !playerInput || !playerInput.trim()}/>
         </form>
-        <div className={styles.scroll}  style={{overflowY: "scroll", padding: "10px"}}>
+        <div className={styles.scroll} ref={chatScrollRef} style={{overflowY: "scroll", padding: "10px"}}>
           <div style={{
             maxWidth: "800px", width: "calc(100vw - 30px)", display: "flex", flexDirection: "column", justifyContent: "flex-start"
           }}>
