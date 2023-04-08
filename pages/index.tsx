@@ -30,6 +30,17 @@ function setupFirestore() {
     }
 }
 
+function emojiForEvent(event: string) {
+  switch (event) {
+    case "wrong":
+      return "🔴";
+    case "hint":
+      return "🟡";
+    case "question":
+      return "❓";
+  }
+}
+
 export default function Home() {
   const [playerInput, setPlayerInput] = useState("");
   const [conversation, setConversation] = useState([]);
@@ -93,8 +104,12 @@ export default function Home() {
       setTimerRunning(true);
     },
     recordEvent(phraseIndex, event) {
-      const eventCopy = [...events[phraseIndex]];
-      events[phraseIndex] = eventCopy.push(event);
+      console.log(events)
+      console.log(phraseIndex)
+      console.log(event)
+      if (events[phraseIndex]) {
+        events[phraseIndex].push(event);
+      }
       setEvents(events);
     },
     finishRound(index, phrase) {
@@ -168,15 +183,26 @@ export default function Home() {
                   alignItems: "center",
                   width: "100%",
                 }}>
-                  <h3 style={{margin: "6px", padding: "6px", borderRadius: "3px", backgroundColor: "white"}}>{title}</h3>
+                  <h3 style={{margin: "6px", padding: "6px", borderRadius: "3px", backgroundColor: "white"}}>{`${title}`}</h3>
                   <div style={{margin: "6px", padding: "6px", borderRadius: "3px", backgroundColor: "white", display: "flex"}}>
                     <img src="/timer.png" style={{height: "22px", width: "22px", marginRight: "6px"}}/>
                     <CountDown time={timer}/>
                   </div>
                 </div>
-                <div>
+                <div style={{width: "100%", display: "flex", justifyContent: "flex-start", flexDirection: "column"}}>
                   {phrases.map((phrase, index) => {
-                    return <div key={index}>{`${index + 1}: ${phrase ? phrase : '___________________'}`}</div>
+                    return (
+                      <div style={{margin: "6px", padding: "6px", borderRadius: "3px", backgroundColor: "white", flex: "0 0 auto"}} key={index}>
+                        {`${index + 1}: ${phrase ? phrase : '____________________________'}`}
+                        {/* <div>{events[index].map(event => {
+                          return (
+                            <span key={index}>
+                              {emojiForEvent(event)}
+                            </span>
+                          )
+                        })}</div> */}
+                      </div>
+                    )
                   })}
                 </div>
               </div>

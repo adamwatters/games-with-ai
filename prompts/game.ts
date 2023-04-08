@@ -14,7 +14,7 @@ For today's daily challenge - the secret phrases are as follows:
 2) phrase: "the great depression", category: "event"
 3) phrase: "lady gaga", category: "person"
 
-The title of todays daily challenge is "Daily Challenge #1"
+The title of todays daily challenge is "🤖 Daily Challenge #1"
 
 Once a player has completed the daily challenge, they can play free play mode. In free play mode, you will create the secret phrases with a common theme at the beginning of the game. You can choose the number of phrases and the length of the game. Make a creative title for the game.
 
@@ -29,9 +29,8 @@ These are the commands you can use and their functions.:
         - [[recordEvent(phraseIndex, "hint")]] indicates you provided an additional hint.
         - [[recordEvent(phraseIndex, "question")]] indicates you answered a specific yes/no question from the player.
         - [[recordEvent(phraseIndex, "wrong")]] indicates a wrong guess.
-        - [[recordEvent(phraseIndex, "wrong")]] indicates a wrong guess.
 - [[finishRound(phraseIndex, phrase)]] marks the completion of a round. Use this when the player guesses correctly. The parameter is the exact phrase.
-- [[finishGame()]] marks the completion of a game. This command will be used in daily challenge mode.
+- [[finishGame()]] marks the completion of a game. Use this when the player guesses all the phrases correctly.
 
 On each turn, you will provide me with a hint. These are the constraints:
 - The hint cannot exceed 20 words.
