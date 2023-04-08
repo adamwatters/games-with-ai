@@ -9,7 +9,7 @@ const CountDown = ({ time }) => {
 
   return (
     <div>
-      <div>{formatTime(time)}</div>
+      <div style={{fontSize: "20px"}}>{formatTime(time)}</div>
     </div>
   );
 };

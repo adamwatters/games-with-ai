@@ -34,7 +34,9 @@ export default function Home() {
   const [playerInput, setPlayerInput] = useState("");
   const [conversation, setConversation] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [title, setTitle] = useState([]);
   const [phrases, setPhrases] = useState([]);
+  const [events, setEvents] = useState([]);
 
   const [timerRunning, setTimerRunning] = useState(false);
   const [timer, setTimer] = useState(120);
@@ -80,13 +82,20 @@ export default function Home() {
 
   // functions AI can call via actions
   const aiFunctions = {
-    setupGame(phraseCount, gameLengthInSeconds) {
+    setupGame(title, phraseCount, gameLengthInSeconds) {
       setTimer(gameLengthInSeconds);
       setTimerRunning(false);
       setPhrases(Array(Number(phraseCount)).fill(null))
+      setEvents(Array(Number(phraseCount)).fill([]))
+      setTitle(title)
     },
     startGame() {
       setTimerRunning(true);
+    },
+    recordEvent(phraseIndex, event) {
+      const eventCopy = [...events[phraseIndex]];
+      events[phraseIndex] = eventCopy.push(event);
+      setEvents(events);
     },
     finishRound(index, phrase) {
       const copy = [...phrases];
@@ -109,7 +118,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ playerInput: `${playerInput} (time remaining: ${timer})`, userID: getFromStorage("userID") }),
+        body: JSON.stringify({ playerInput: `${playerInput} [[time remaining: ${timer}]]`, userID: getFromStorage("userID") }),
       });
 
       const data = await response.json();
@@ -146,14 +155,25 @@ export default function Home() {
         { conversation.length < 1 ? (
           <>
             <p>The daily secret codes are the same for everyone. After you've solved them, you can ask the AI to make up more secret phrases in free play mode.</p>
-            <p>The AI will be with you shortly.</p>
+            <p>Say hello and introduce yourself.</p>
           </>
         ) : (
           <>
             {phrases.length > 0 ? (
               <div className={styles.dailyScoreCard}>
-                <h3>Daily Challenge</h3>
-                <CountDown time={timer}/>
+                <div style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  width: "100%",
+                }}>
+                  <h3 style={{margin: "6px", padding: "6px", borderRadius: "3px", backgroundColor: "white"}}>{title}</h3>
+                  <div style={{margin: "6px", padding: "6px", borderRadius: "3px", backgroundColor: "white", display: "flex"}}>
+                    <img src="/timer.png" style={{height: "22px", width: "22px", marginRight: "6px"}}/>
+                    <CountDown time={timer}/>
+                  </div>
+                </div>
                 <div>
                   {phrases.map((phrase, index) => {
                     return <div key={index}>{`${index + 1}: ${phrase ? phrase : '___________________'}`}</div>
